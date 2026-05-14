@@ -1,4 +1,4 @@
-﻿
+
         document.addEventListener('DOMContentLoaded', () => {
 
             /* -----------------------------------------------
@@ -105,5 +105,53 @@
             }
 
             window.addEventListener('scroll', onScroll, { passive: true });
+
+            /* -----------------------------------------------
+               6. Drawer / Menu Lateral
+            ----------------------------------------------- */
+            const menuToggleBtn = document.getElementById('menu-toggle-btn');
+            const sideDrawer = document.getElementById('side-drawer');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const drawerClose = document.getElementById('drawer-close');
+            
+            // Abrir Drawer
+            if (menuToggleBtn) {
+                menuToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sideDrawer.classList.add('active');
+                    drawerOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Impede scroll atrás
+                });
+            }
+
+            // Fechar Drawer
+            const closeDrawer = () => {
+                sideDrawer.classList.remove('active');
+                drawerOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+            if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+            // Accordion Produtos no Drawer
+            const drawerAccordionBtn = document.getElementById('drawer-accordion-btn');
+            if (drawerAccordionBtn) {
+                drawerAccordionBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const parentItem = drawerAccordionBtn.closest('.drawer-item');
+                    parentItem.classList.toggle('active');
+                });
+            }
+
+            // Início volta para o topo (fechando drawer)
+            const drawerHomeLink = document.getElementById('drawer-home-link');
+            if (drawerHomeLink) {
+                drawerHomeLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    closeDrawer();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
         });
-    

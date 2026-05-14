@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(uuid())
+  name             String
+  email            String            @unique
+  emailVerified    DateTime?
+  passwordHash     String?
+  googleId         String?           @unique
+  appleId          String?           @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  addresses        Address[]
+  cartItems        CartItem[]
+  orders           Order[]
+  wishlist         WishlistItem[]
+  reviews          Review[]
+  supportChats     SupportChat[]
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  zip          String
+  phone        String
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model CartItem {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int      @default(1)
+  variationData String?
+  priceAtAdd    Decimal
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id                String       @id @default(uuid())
+  userId            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status            String       @default("pending")
+  total             Decimal
+  shippingAddressId String
+  paymentMethod     String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  items             OrderItem[]
+}
+
+model OrderItem {
+  id            String  @id @default(uuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int
+  unitPrice     Decimal
+  variationData String?
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating             Int      @default(5)
+  title              String?
+  body               String
+  isVerifiedPurchase Boolean  @default(false)
+  helpfulYes         Int      @default(0)
+  helpfulNo          Int      @default(0)
+  images             String?
+  status             String   @default("published")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  name          String
+  slug          String    @unique
+  description   String?
+  price         Decimal
+  originalPrice Decimal?
+  imageUrl      String
+  badge         String?
+  isNew         Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
+  reviews       Review[]
+}
+
+model SupportChat {
+  id        String           @id @default(uuid())
+  userId    String?
+  user      User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  orderId   String?
+  status    String           @default("open")
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  messages  SupportMessage[]
+}
+
+model SupportMessage {
+  id         String      @id @default(uuid())
+  chatId     String
+  chat       SupportChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderType String
+  message    String
+  createdAt  DateTime    @default(now())
+}
